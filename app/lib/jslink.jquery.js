@@ -3,7 +3,6 @@
     var self = $(this);
     var changeEvents = ['change'];
     var links = {};
-    
     var writeValue = function(element, value) {
       if (element.is('input[type=checkbox]')) {
         element.attr('checked', value);

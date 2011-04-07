@@ -1,14 +1,16 @@
-var i = 0;
-function JQueryHandleBarsTemplate(domElement, model, templateString, options) {
-  this.templateString = this.santitizeTemplateString(templateString);
-  this.template = Handlebars.compile(this.templateString);
+function JQueryHandleBarsTemplate(domElement, model, template, options) {
+  if ((typeof template) == 'string') {
+    this.templateString = this.santitizeTemplateString(template);
+    template = Handlebars.compile(this.templateString);
+  }
+  this.template = template;
   this.options = options || {};
   this.domElement = domElement;
   this.model = model || this.domElement;
-  
-  this.model.bind('changeData addData removeData', function(e, f, v) {
-    console.log([e,f,v]);
-    template.render();
+
+  var self = this;
+  this.model.bind('changeData addData removeData', function(e) {
+    self.render();
   });
 
   this.render();
@@ -29,6 +31,14 @@ JQueryHandleBarsTemplate.prototype.santitizeTemplateString = function(templateSt
   return templateString;
 };
 
+JQueryHandleBarsTemplate.prototype.establishTemplate = function() {
+  if (typeof this.compiledTemplate == 'undefined') {
+    this.compiledTemplate = Handlebars.compile(this.templateString);
+  }
+  
+  return this.compiledTemplate;
+};
+
 JQueryHandleBarsTemplate.prototype.renderSingle = function() {
   var rendering = $(this.template(this.model.data()));
   var model = this.model;
@@ -47,10 +57,15 @@ JQueryHandleBarsTemplate.prototype.renderSingle = function() {
 JQueryHandleBarsTemplate.prototype.renderCollection = function() {
   var result = $('<div/>');
   var template = this;
+  
+  var compiledTemplate = this.establishTemplate();
+  
+  this.domElement.removeTemplateBindings();
   $.each(this.model, function() {
-    innerTemplate = JQueryHandleBarsTemplate.renderTemplate($('<div/>'), this, template.templateString);
+    innerTemplate = JQueryHandleBarsTemplate.renderTemplate($('<div/>'), this, compiledTemplate, {replaceContainerElement: true});
     result.append(innerTemplate.domElement);
   });
+
   this.domElement.empty().append(result.children());
 };
 
@@ -62,8 +77,8 @@ JQueryHandleBarsTemplate.prototype.render = function() {
   }
 };
 
-JQueryHandleBarsTemplate.renderTemplate = function(domElement, model, templateString, options) {
-  return new JQueryHandleBarsTemplate(domElement, model, templateString);
+JQueryHandleBarsTemplate.renderTemplate = function(domElement, model, template, options) {
+  return new JQueryHandleBarsTemplate(domElement, model, template, options);
 };
 
 (function($){
@@ -84,5 +99,18 @@ JQueryHandleBarsTemplate.renderTemplate = function(domElement, model, templateSt
     }
     
     return result;
+  };
+  
+  $.fn.removeTemplateBindings = function() {
+    this.each(function() {
+      $(this).children().each(function() {
+        var element = $(this);
+        var template = element.data('_templateObject');
+        if (template) {
+          template.model.unbind();
+        }
+        element.removeTemplateBindings();
+      });
+    });
   };
 })(jQuery);
