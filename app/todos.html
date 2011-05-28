@@ -64,6 +64,21 @@
         todos.push(newItem);
         form.find(':input').val('').change();
       });
+      
+      $('button').click(function(e) {
+        e.preventDefault();
+        for (i = 0; i < todos.length; i++) {
+          if (todos[i].data('done')) {
+            todos.splice(i, 1);
+            i--;
+          }
+        }
+      });
+      
+      $(':input.mark-all-done').change(function() {
+        var checked = $(this).attr('checked');
+        $.each(todos, function() {this.data('done', checked);});
+      });
     });
   </script>
 </body>
