@@ -502,6 +502,6 @@ body {
   margin-bottom: 5px;
 }
 
-#todos ul li.is-done {
+#todos ul li .is-done {
   text-decoration: line-through;
 }

@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <link rel="stylesheet" href="todos.css" type="text/css" media="screen" charset="utf-8">
+    <title>Todos</title>
+  </head>
+  <body>
+    
+    <script src="vendor/jquery/jquery-1.6.1.min.js?1308223169" type="text/javascript"></script> 
+    <script src="vendor/jquery/jquery.ba-bbq.min.js?1307923201" type="text/javascript"></script> 
+    <script src="vendor/mustache/mustache.0.3.0.js?1307923201" type="text/javascript"></script> 
+    <script src="vendor/eyeballs/o_O.js?1307923201" type="text/javascript"></script> 
+    <script src="vendor/eyeballs/modules/o_O.model.js?1308259919" type="text/javascript"></script> 
+    <script src="vendor/eyeballs/modules/o_O.bucket.js?1308259919" type="text/javascript"></script> 
+    <script src="vendor/eyeballs/modules/o_O.validations.js?1307923201" type="text/javascript"></script> 
+    <script src="vendor/eyeballs/drivers/jquery/adapters/o_O.rest.js?1308263219" type="text/javascript"></script> 
+    <script src="vendor/eyeballs/drivers/jquery/modules/o_O.controller.js?1307923201" type="text/javascript"></script> 
+    <script src="vendor/eyeballs/drivers/jquery/modules/o_O.support.js?1307923201" type="text/javascript"></script> 
+    <script src="vendor/eyeballs/drivers/jquery/modules/o_O.routes.js?1307923201" type="text/javascript"></script> 
+    <script src="config/routes.js?1308178127" type="text/javascript"></script> 
+    <script src="config/initializer.js?1308071011" type="text/javascript"></script> 
+    <script src="app/models/todo.js?1308931176" type="text/javascript"></script> 
+    <script src="app/controllers/todos_controller.js?1308178081" type="text/javascript"></script> 
+    
+    <script type="text/javascript"> 
+      $(document).ready(function() {
+        o_O('TodosController').index();
+      });
+    </script> 
+  </body>
+</html>
