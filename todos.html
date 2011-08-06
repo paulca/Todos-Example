@@ -4,29 +4,104 @@
   <head>
     <link rel="stylesheet" href="todos.css" type="text/css" media="screen" charset="utf-8">
     <title>Todos</title>
+    
+    <div id="todos"><h1>Todos</h1>
+      <div>
+        <form id="new-todo">
+          <input placeholder="What to do?" type="text" name="text">
+        </form>
+      </div>
+
+      <div id="stats">
+        <div>
+          <button id="clear-completed">Clear Completed Todos</button>
+        </div>
+        <span id="number-of-items">0 items</span>
+      </div>
+
+      <div>
+        <label class="done-label">
+          <input class="mark-all-done" type="checkbox" data-bind="+todos#mark_all_done"> Mark All as Done
+        </label>
+      </div>
+
+      <ul id="todo-list" data-collection="Todo">
+      </ul>
+    </div>
+    
   </head>
   <body>
-    
-    <script src="vendor/jquery/jquery-1.6.1.min.js?1308223169" type="text/javascript"></script> 
-    <script src="vendor/jquery/jquery.ba-bbq.min.js?1307923201" type="text/javascript"></script> 
-    <script src="vendor/mustache/mustache.0.3.0.js?1307923201" type="text/javascript"></script> 
-    <script src="vendor/eyeballs/o_O.js?1307923201" type="text/javascript"></script> 
-    <script src="vendor/eyeballs/modules/o_O.model.js?1308259919" type="text/javascript"></script> 
-    <script src="vendor/eyeballs/modules/o_O.bucket.js?1308259919" type="text/javascript"></script> 
-    <script src="vendor/eyeballs/modules/o_O.validations.js?1307923201" type="text/javascript"></script> 
-    <script src="vendor/eyeballs/drivers/jquery/adapters/o_O.rest.js?1308263219" type="text/javascript"></script> 
-    <script src="vendor/eyeballs/drivers/jquery/modules/o_O.controller.js?1307923201" type="text/javascript"></script> 
-    <script src="vendor/eyeballs/drivers/jquery/modules/o_O.support.js?1307923201" type="text/javascript"></script> 
-    <script src="vendor/eyeballs/drivers/jquery/modules/o_O.routes.js?1307923201" type="text/javascript"></script> 
-    <script src="config/routes.js?1308178127" type="text/javascript"></script> 
-    <script src="config/initializer.js?1308071011" type="text/javascript"></script> 
-    <script src="app/models/todo.js?1308931176" type="text/javascript"></script> 
-    <script src="app/controllers/todos_controller.js?1308178081" type="text/javascript"></script> 
+    <script src="jquery-1.6.1.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="eyeballs.js" type="text/javascript" charset="utf-8"></script>
+    <script src="eyeballs.jquery.js" type="text/javascript" charset="utf-8"></script>
     
     <script type="text/javascript"> 
-      $(document).ready(function() {
-        o_O('TodosController').index();
+      o_O('Todo', function(){
+        this.to_html(function(model){
+          var out;
+          out = '<li data-id="' + model.id +  '" data-model="Todo"><label'
+          if(model.done)
+          {
+            out = out + ' class="is-done"'
+          }
+          out = out + '>'
+          out = out + '<input data-id="' + model.id +  '" type="checkbox" name="done"'
+          if(model.done)
+          {
+            out = out + 'checked="checked"'
+          }
+          out = out + '>'
+          out = out + model.text
+          out = out + '</label></li>'
+          return out
+        })
       });
+      
+      var MyApp = function(){}
+      MyApp.reset_stats = function(){
+        var count = o_O('Todo').all().length
+        $('#number-of-items').html(count + ' items')
+      }
+      
+      eyeballs.hooks.add({
+        after_create: MyApp.reset_stats,
+        after_update: MyApp.reset_stats,
+        after_destroy: MyApp.reset_stats
+      })
+      
+      $(function(){
+        $('#new-todo').submit(function(){
+          o_O('Todo').create({text: $(this).serializeArray()[0]['value']})
+          this.reset()
+          return false;
+        })
+
+        $('input[name=done]').live('click', function(){
+          var todo
+          todo = o_O('Todo').find($(this).data('id'))
+          todo.set('done', !todo.get('done'))
+        })
+        
+        $('input.mark-all-done').click(function(){
+          var checkbox = $(this)
+          for(i=0; i < o_O('Todo').all().length; i = i+1)
+          {
+            o_O('Todo').all()[i].set('done', checkbox.attr('checked'))
+          }
+        })
+        
+        $('#clear-completed').click(function(){
+          for(i=0; i < o_O('Todo').all().length; i = i+1)
+          {
+            var todo;
+            todo = o_O('Todo').all()[i];
+            if(todo.get('done'))
+            {
+              todo.destroy();
+            }
+          }
+        })
+      })
     </script> 
   </body>
 </html>
