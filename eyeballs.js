@@ -40,7 +40,28 @@ var eyeballs = {
   },
   registered_models: {},
   register_or_load_model: function(name, initializer){
-    var initialize_functions, initialize, load, register;
+    var initialize_functions, initialize, load, register, selector_defaults;
+        
+    selector_defaults = {
+      'collection': "[data-collection=" + name + "]",
+      'empty': '[data-empty=true]',
+      'model': "[data-model=" + name + "]"      
+    }
+
+    selector = function(type){
+      return function(){
+        if(typeof eyeballs.registered_models[name][type + '_selector'] ===
+           'function')
+        {
+          return eyeballs.registered_models[name][type + '_selector'](
+                   name);
+        }
+        else
+        {
+          return selector_defaults[type];
+        }
+      }
+    }
     
     initialize_functions = {
       to_html: function(){
@@ -59,9 +80,18 @@ var eyeballs = {
       collection_selector: function(callback){
         eyeballs.registered_models[name]['collection_selector'] = callback;
       },
+      empty_collection: function(callback){
+        eyeballs.registered_models[name]['empty_collection'] = callback;
+      },
+      empty_selector: function(callback){
+        eyeballs.registered_models[name]['empty_selector'] = callback;
+      },
       instance_selector: function(callback){
         eyeballs.registered_models[name]['instance_selector'] = callback;
-      }
+      },
+      model_selector: function(callback){
+        eyeballs.registered_models[name]['model_selector'] = callback;
+      },
     }
     
     initialize = function(attrs){
@@ -70,26 +100,16 @@ var eyeballs = {
         attrs.id = +new Date();
       }
       return {
-        collection_selector: function(){
-          if(typeof eyeballs.registered_models[name]['collection_selector'] ===
-             'function')
-          {
-            return eyeballs.registered_models[name]['collection_selector'](
-                     name, attrs);
-          }
-          else
-          {
-            return "[data-collection=" + name + "]";
-          }
-        },
+        collection_selector: selector('collection'),
         destroy: function(){
-          eyeballs.hooks.after_destroy(this);
           delete eyeballs.registered_models[name]['data'][attrs.id];
+          eyeballs.hooks.after_destroy(this);
         },
         get: function(attr)
         {
           return attrs[attr];
         },
+        empty_selector: selector('empty'),
         instance_selector: function(){
           if(typeof eyeballs.registered_models[name]['instance_selector'] ===
              'function')
@@ -165,7 +185,17 @@ var eyeballs = {
           return records;
         },
         empty_collection: function(){
-          return '<p data-empty="true">No ' + name.toLowerCase() + 's here.</p>'
+          if(typeof eyeballs.registered_models[name]['empty_collection'] ===
+             'function')
+          {
+            return eyeballs.registered_models[name]['empty_collection']();
+          }
+          else
+          {
+            return '<p data-empty="true">No ' +
+                   name.toLowerCase() + 
+                   's here.</p>';
+          }
         },
         create: function(attrs){
           var model;
@@ -183,11 +213,20 @@ var eyeballs = {
           {
             return [];
           }
+        },
+        initialize: function(){
+          eyeballs.hooks.after_initialize({
+            model_name: name,
+            collection_selector: selector('collection'),
+            empty_selector: selector('empty'),
+            model_selector: selector('model')
+          })
         }
       };
     }
     
     register_model = function(){
+      var loaded_model;
       eyeballs.registered_models[name] = {}
       eyeballs.registered_models[name]['data'] = {}
       eyeballs.registered_models[name]['html'] = {}
@@ -195,8 +234,9 @@ var eyeballs = {
       {
         initializer.apply(initialize_functions)
       }
-      eyeballs.hooks.after_initialize(name)
-      return load_model(name);
+      loaded_model = load_model(name)
+      loaded_model.initialize()
+      return loaded_model;
     }
     
     if(this.registered_models.hasOwnProperty(name))

@@ -25,7 +25,7 @@
         </label>
       </div>
 
-      <ul id="todo-list" data-collection="Todo">
+      <ul id="todo-list">
       </ul>
     </div>
     
@@ -37,6 +37,15 @@
     
     <script type="text/javascript"> 
       o_O('Todo', function(){
+        this.collection_selector(function(){
+          return '#todo-list'
+        })
+        this.empty_collection(function(){
+          return '<li class="empty">No Todos.</li>'
+        })
+        this.empty_selector(function(){
+          return '.empty'
+        })
         this.to_html(function(model){
           var out;
           out = '<li data-id="' + model.id +  '" data-model="Todo"><label'
@@ -57,19 +66,39 @@
         })
       });
       
-      var MyApp = function(){}
-      MyApp.reset_stats = function(){
-        var count = o_O('Todo').all().length
-        $('#number-of-items').html(count + ' items')
+      var TodoApp = function(){}
+      TodoApp.reset_stats = function(){
+        var count, item;
+        count = o_O('Todo').all().length;
+        item = (count === 1) ? 'item' : 'items'
+        
+        $('#number-of-items').html(count + ' ' + item)
+      }
+      
+      TodoApp.retrieve_from_localstorage = function(){
+        eyeballs.registered_models['Todo']['data'] = JSON.parse(localStorage.getItem('Todo'))
+        o_O('Todo').initialize()
+      }
+      
+      TodoApp.commit_to_localstorage = function(){
+        localStorage.setItem('Todo', JSON.stringify(eyeballs.registered_models['Todo']['data']))
       }
       
       eyeballs.hooks.add({
-        after_create: MyApp.reset_stats,
-        after_update: MyApp.reset_stats,
-        after_destroy: MyApp.reset_stats
+        after_create: TodoApp.reset_stats,
+        after_update: TodoApp.reset_stats,
+        after_destroy: TodoApp.reset_stats
+      })
+      
+      eyeballs.hooks.add({
+        after_create: TodoApp.commit_to_localstorage,
+        after_update: TodoApp.commit_to_localstorage,
+        after_destroy: TodoApp.commit_to_localstorage
       })
       
       $(function(){
+        TodoApp.retrieve_from_localstorage();
+        
         $('#new-todo').submit(function(){
           o_O('Todo').create({text: $(this).serializeArray()[0]['value']})
           this.reset()
