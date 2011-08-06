@@ -84,22 +84,18 @@
         
         $('input.mark-all-done').click(function(){
           var checkbox = $(this)
-          for(i=0; i < o_O('Todo').all().length; i = i+1)
-          {
-            o_O('Todo').all()[i].set('done', checkbox.attr('checked'))
-          }
+          o_O('Todo').all(function(todo){
+            todo.set('done', checkbox.attr('checked'))
+          })
         })
         
         $('#clear-completed').click(function(){
-          for(i=0; i < o_O('Todo').all().length; i = i+1)
-          {
-            var todo;
-            todo = o_O('Todo').all()[i];
+          o_O('Todo').all(function(todo){
             if(todo.get('done'))
             {
               todo.destroy();
             }
-          }
+          })
         })
       })
     </script> 
