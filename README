@@ -3,8 +3,4 @@ Project:   Todos
 Copyright: ©2011 My Company, Inc.
 =============================================================================
 
-Todos application.
-
-An experiment to find out how complex it is to built something like the SproutCore (http://guides.sproutcore.com/html_based.html) or Backbone (http://documentcloud.github.com/backbone/examples/todos/index.html) Todo Demo with plain jQuery, jquery-datalink, handlebars and some basic glue code.
-
-
+This is the (in)famous JS todos example refactored to use eyeballs.js.
