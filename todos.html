@@ -76,7 +76,12 @@
       }
       
       TodoApp.retrieve_from_localstorage = function(){
-        eyeballs.registered_models['Todo']['data'] = JSON.parse(localStorage.getItem('Todo'))
+        var data;
+        data = JSON.parse(localStorage.getItem('Todo'));
+        if(data !== null)
+        {
+          eyeballs.registered_models['Todo']['data'] = data
+        }
         o_O('Todo').initialize()
       }
       
@@ -121,9 +126,7 @@
         $('#clear-completed').click(function(){
           o_O('Todo').all(function(todo){
             if(todo.get('done'))
-            {
               todo.destroy();
-            }
           })
         })
       })
